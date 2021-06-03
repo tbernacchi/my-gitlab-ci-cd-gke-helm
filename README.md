@@ -56,15 +56,13 @@ You're going to need to create an account service on GCP to allow Gitlab to read
 
 > https://cloud.google.com/compute/docs/access/service-accounts
 
-With the account service created you need to generate a key to allow GKE access GitLab Docker registry to pull the docker images;
-
-With the key:
+With the account service created you need to generate a key to allow GKE access GitLab Docker registry to pull the docker images, with the key:
 
 ```
 kubectl create secret docker-registry gitlab-registry --docker-server=registry.gitlab.com --docker-username=tbernacchi --docker-password=my-key-generate-at-iam-console-at-gcp --docker-email=tbernacchi@gmail.com
 ```
 
-At Gilab we create a deploy token with the same key (Settings, Repository, Deploy tokens);
+At GitLab we create a deploy token with the same key (Settings, Repository, Deploy tokens);
 
 We also must create an account into the k8s cluster for gitlab, it must have cluster-admin privileges:
 
@@ -108,7 +106,7 @@ kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | gre
 
 # References
 https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
-https://about.gitlab.com/handbook/customer-success/demo-systems/tutorials/getting-started/configuring-group-cluster/
+https://about.gitlab.com/handbook/customer-success/demo-systems/tutorials/getting-started/configuring-group-cluster
 https://medium.com/@yanick.witschi/automated-kubernetes-deployments-with-gitlab-helm-and-traefik-4e54bec47dcf
 
 ## Author
