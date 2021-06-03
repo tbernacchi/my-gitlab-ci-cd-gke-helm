@@ -6,10 +6,6 @@
 
 ![GitLab](/.github/assets/img/gitlab-pipe.png)
 
-<div align=>
-	<img align="center" width="400px" src=/.github/assets/img/gitlab-pipe.png>
-</div>
-
 ## Table of Contents
 
 * **GitLab**  
