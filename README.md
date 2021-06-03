@@ -85,17 +85,17 @@ subjects:
     namespace: kube-system
 ```
 
-````
+```
 kubectl create -f gitlab-admin-service-account.yaml
 ```
 
 To integrate GKE with Gitlab we need:
 
-````
+```
 kubectl cluster-info | grep -E 'Kubernetes master|Kubernetes control plane' | awk '/http/ {print $NF}'
 kubectl get secret default-token-l76rk -o jsonpath="{['data']['ca\.crt']}" | base64 --decode
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab | awk '{print $1}')
-````
+```
 
 # Information and references to integrate GKE with GitLab
 https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
