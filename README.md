@@ -22,34 +22,85 @@
   * [Official Docs](https://cloud.google.com/kubernetes-engine/docs/quickstart)
   * [Official Github](https://github.com/GoogleCloudPlatform/kubernetes-engine-samples)
 
+
+  https://kubernetes.io/docs/tasks/tools/
+
 * **Helm**  
   * [Official Website](https://helm.sh/)
   * [Official Docs](https://helm.sh/docs/)
   * [Official Github](https://github.com/helm/helm)
 
 ## Requirements
-* Gitlab + Google Cloud account;
-* kubectl + helm;
+* Gitlab;
+* GCP;
+* kubectl;
+* helm;
 
 ## Usage
 
 ```
-gcloud auth login
-gcloud components update
-gcloud config set project <my-project>
-gcloud container clusters create my-cluster-datadog --zone southamerica-east1-a --project <my-project>
+gcloud container clusters create my-k8s-dev --zone southamerica-east1-a --project <my-project>
+kubectl config current-context 
+gcloud container clusters get-credentials my-k8s-dev --zone southamerica-east1-a
+````
+
+You're going to need to create an account service on GCP to allow Gitlab to read/write on GKE:
+https://cloud.google.com/compute/docs/access/service-accounts
+
+With the account service created you need to generate a key to allow GKE access GitLab Docker registry to pull the docker images;
+
+With the key:
+
+```
+kubectl create secret docker-registry gitlab-registry --docker-server=registry.gitlab.com --docker-username=tbernacchi --docker-password=my-key-generate-at-iam-console-at-gcp --docker-email=tbernacchi@gmail.com
+```
+
+At Gilab we create a deploy token with the same key (Settings, Repository, Deploy tokens);
+
+We also must create an account into the k8s cluster for gitlab, it must have cluster-admin privileges:
+
+```
+$ touch gitlab-admin-service-account.yaml 
 ```
 
 ```
-helm repo add datadog https://helm.datadoghq.com
-helm repo add stable https://charts.helm.sh/stable
-helm repo update
-kubectl create namespace datadog
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gitlab-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: gitlab
+    namespace: kube-system
 ```
 
+````
+kubectl create -f gitlab-admin-service-account.yaml
 ```
-helm install tadeu-teste-datadog -f values.yml -n datadog --set datadog.site='datadoghq.com' --set datadog.apiKey=myapikeyec747bdd2b92a3fc42345678 datadog/datadog
-```
+
+To integrate GKE with Gitlab we need:
+
+````
+kubectl cluster-info | grep -E 'Kubernetes master|Kubernetes control plane' | awk '/http/ {print $NF}'
+kubectl get secret default-token-l76rk -o jsonpath="{['data']['ca\.crt']}" | base64 --decode
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab | awk '{print $1}')
+````
+
+# Information and references to integrate GKE with GitLab
+https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
+https://about.gitlab.com/handbook/customer-success/demo-systems/tutorials/getting-started/configuring-group-cluster/
+https://medium.com/@yanick.witschi/automated-kubernetes-deployments-with-gitlab-helm-and-traefik-4e54bec47dcf
 
 ## Author
 
