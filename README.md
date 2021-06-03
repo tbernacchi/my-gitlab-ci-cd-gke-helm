@@ -97,7 +97,7 @@ kubectl get secret default-token-l76rk -o jsonpath="{['data']['ca\.crt']}" | bas
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab | awk '{print $1}')
 ```
 
-# Information and references to integrate GKE with GitLab
+# References
 https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 https://about.gitlab.com/handbook/customer-success/demo-systems/tutorials/getting-started/configuring-group-cluster/
 https://medium.com/@yanick.witschi/automated-kubernetes-deployments-with-gitlab-helm-and-traefik-4e54bec47dcf
