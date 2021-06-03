@@ -6,6 +6,10 @@
 
 ![GitLab](/.github/assets/img/gitlab-pipe.png)
 
+<div align=>
+	<img align="center" width="400px" src=/.github/assets/img/google-cloud-logo.png.png>
+</div>
+
 ## Table of Contents
 
 * **GitLab**  
@@ -24,11 +28,8 @@
   * [Official Github](https://github.com/helm/helm)
 
 ## Requirements
-* Google Cloud SDK;
-* gcloud CLI;  
-* kubectl;  
-* helm;
-* Datadog account + Apikey;
+* Gitlab + Google Cloud account;
+* kubectl + helm;
 
 ## Usage
 
