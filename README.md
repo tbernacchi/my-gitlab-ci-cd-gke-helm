@@ -2,7 +2,7 @@
 <p>
 </p>
 
-> My pipeline deploy of two applications (frontend/Python - backend/Golang) using Gitlab CI/CD using GKE and Helm.
+> My pipeline using Gitlab CI/CD using GKE and Helm.
 
 ![GitLab](/.github/assets/img/gitlab-pipe.png)
 
