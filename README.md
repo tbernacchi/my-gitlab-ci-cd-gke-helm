@@ -106,7 +106,7 @@ kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | gre
 
 # References
 https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
-https://about.gitlab.com/handbook/customer-success/demo-systems/tutorials/getting-started/configuring-group-cluster
+https://about.gitlab.com/handbook/customer-success/demo-systems/tutorials/getting-started/configuring-group-cluster  
 https://medium.com/@yanick.witschi/automated-kubernetes-deployments-with-gitlab-helm-and-traefik-4e54bec47dcf
 
 ## Author
