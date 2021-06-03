@@ -17,21 +17,29 @@
   * [Official Docs](https://docs.gitlab.com/)
   * [Official Github](https://github.com/gitlabhq)
 
-* **GKE**  
-  * [Official Website](https://cloud.google.com/kubernetes-engine)
-  * [Official Docs](https://cloud.google.com/kubernetes-engine/docs/quickstart)
-  * [Official Github](https://github.com/GoogleCloudPlatform/kubernetes-engine-samples)
+* **Docker**
+  * [Offical Website](https://www.docker.com/)
+  * [Offical Docs](https://docs.docker.com/)
+  * [Official Github](https://github.com/docker/)
 
-
-  https://kubernetes.io/docs/tasks/tools/
+* **Kubernetes**
+  * [Official Website](https://kubernetes.io)
+  * [Official Docs](https://kubernetes.io/docs/home/)
+  * [Official Github](https://github.com/kubernetes)
 
 * **Helm**  
   * [Official Website](https://helm.sh/)
   * [Official Docs](https://helm.sh/docs/)
   * [Official Github](https://github.com/helm/helm)
 
+* **GKE**  
+  * [Official Website](https://cloud.google.com/kubernetes-engine)
+  * [Official Docs](https://cloud.google.com/kubernetes-engine/docs/quickstart)
+  * [Official Github](https://github.com/GoogleCloudPlatform/kubernetes-engine-samples)
+
 ## Requirements
 * Gitlab;
+* Docker;
 * GCP;
 * kubectl;
 * helm;
