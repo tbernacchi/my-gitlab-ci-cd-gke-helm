@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend-service
+spec:
+  selector:
+    app: {{ .Release.Name}}-frontend 
+  ports:
+    - port: {{ .Values.frontend.containerport }}
+  type: ClusterIP 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Release.Name }}-frontend
+  name: {{ .Release.Name }}-frontend 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-frontend 
+  template:
+    metadata: 
+      labels: 
+        app: {{ .Release.Name }}-frontend 
+    spec:
+      containers:
+      - name: frontend-python
+        image: {{ .Values.frontend.image }}:{{ .Values.version.front }}
+        imagePullPolicy: IfNotPresent
+        ports: 
+        - containerPort: {{ .Values.frontend.containerport }} 
+        env:
+        - name: BACKEND_HOST
+          value: "{{ .Release.Name }}-backend-service"
+        - name: BACKEND_PORT
+          value: "{{ .Values.backend.targetport }}"
+      imagePullSecrets:
+      - name: gitlab-registry

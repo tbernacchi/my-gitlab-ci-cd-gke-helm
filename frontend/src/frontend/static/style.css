@@ -1,0 +1,20 @@
+body { font-family: sans-serif; font-size: 20px; background: #eee; padding: 20px}
+
+div{align: center; }
+div.success{background-color: green; color: #fff; padding: 8px;}
+div.fail{background-color: red; color: #fff;padding: 8px;}
+
+input{width: 100%; padding: 12px 20px; margin: 8px 0; box-sizing: border-box; }
+input[type=submit], input[type=button]{
+    font-size: 20px;
+	border: none;
+	padding: 8px 15px 8px 15px;
+	background: #FF8500;
+	color: #fff;
+	box-shadow: 1px 1px 4px #DADADA;
+	-moz-box-shadow: 1px 1px 4px #DADADA;
+	-webkit-box-shadow: 1px 1px 4px #DADADA;
+	border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+}

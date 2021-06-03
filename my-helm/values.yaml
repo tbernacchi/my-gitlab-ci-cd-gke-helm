@@ -1,0 +1,16 @@
+version:
+  front: "2.0"
+  back: "1.0"
+
+deployment: 
+frontend:
+  image: "index.docker.io/tadeuuuuu/my-images-2020/frontend-teste"
+  port: "80"
+  containerport: "8000"
+  targetport: "8000"
+backend:
+  image: "index.docker.io/tadeuuuuu/my-images-2020/backend-teste"
+  port: "80"
+  containerport: "8080"
+  targetport: "8080"
+

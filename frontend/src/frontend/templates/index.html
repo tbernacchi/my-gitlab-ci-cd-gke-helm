@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8'/>
+    <title>User Creation</title>
+    <link rel='stylesheet' href='{{ url_for('static', filename='style.css') }}'/>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  </head>
+  <body>
+    <div class='holder'>
+      <form method='POST' action='/'>
+          ID do usuário:<br>
+          <input type='text' name='id'><br>
+          Nome do usuário:<br>
+          <input type='text' name='name'><br>
+          <input type='submit'>
+      </form>
+      {% if status_code == 200 %}
+        <div class=success>Status Code: {{status_code}}, Response: {{ response }}</div>
+      {% else %}
+      {% if status_code %}
+        <div class=fail>Status Code: {{status_code}}</div>
+      {% endif %}  
+      {% endif %}
+    </div>
+  </body>
+</html>
