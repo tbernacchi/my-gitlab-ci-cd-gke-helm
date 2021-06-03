@@ -53,7 +53,8 @@ gcloud container clusters get-credentials my-k8s-dev --zone southamerica-east1-a
 ````
 
 You're going to need to create an account service on GCP to allow Gitlab to read/write on GKE:
-https://cloud.google.com/compute/docs/access/service-accounts
+
+> https://cloud.google.com/compute/docs/access/service-accounts
 
 With the account service created you need to generate a key to allow GKE access GitLab Docker registry to pull the docker images;
 
