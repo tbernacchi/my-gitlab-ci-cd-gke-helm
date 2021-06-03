@@ -1,16 +1,10 @@
-# My Gitlab CI/CD using GKE and Helm.
-
-```bash
-comandos
-comandos
-```
 <h1 align="">Gitlab CI/CD using GKE and Helm 👋</h1>
 <p>
 </p>
 
 > My pipeline using Gitlab CI/CD using GKE and Helm.
 
-![Datadog](/.github/assets/img/gitlab-pipe.png)
+![GitLab](/.github/assets/img/gitlab-pipe.png)
 
 <div align=>
 	<img align="center" width="400px" src=/.github/assets/img/gitlab-pipe.png>
