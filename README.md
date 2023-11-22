@@ -83,33 +83,6 @@ https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 https://about.gitlab.com/handbook/customer-success/demo-systems/tutorials/getting-started/configuring-group-cluster  
 https://medium.com/@yanick.witschi/automated-kubernetes-deployments-with-gitlab-helm-and-traefik-4e54bec47dcf
 
-## Table of Contents
-
-* **GitLab**  
-  * [Official Website](https://gitlab.com/)
-  * [Official Docs](https://docs.gitlab.com/)
-  * [Official Github](https://github.com/gitlabhq)
-
-* **Docker**
-  * [Offical Website](https://www.docker.com/)
-  * [Offical Docs](https://docs.docker.com/)
-  * [Official Github](https://github.com/docker/)
-
-* **Kubernetes**
-  * [Official Website](https://kubernetes.io)
-  * [Official Docs](https://kubernetes.io/docs/home/)
-  * [Official Github](https://github.com/kubernetes)
-
-* **Helm**  
-  * [Official Website](https://helm.sh/)
-  * [Official Docs](https://helm.sh/docs/)
-  * [Official Github](https://github.com/helm/helm)
-
-* **GKE**  
-  * [Official Website](https://cloud.google.com/kubernetes-engine)
-  * [Official Docs](https://cloud.google.com/kubernetes-engine/docs/quickstart)
-  * [Official Github](https://github.com/GoogleCloudPlatform/kubernetes-engine-samples)
-
 ## Author
 
 👤 **Tadeu Bernacchi**
