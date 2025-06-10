@@ -8,6 +8,163 @@
 	<img align="center" width="300px" src="/.github/assets/img/google-cloud-logo.png">
 </div>
 
+## Getting Started
+
+Just cloned the project? Here's how to get it running:
+
+### 1. Initial Setup
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd my-gitlab-ci-cd-gke-helm
+```
+
+### 2. GitLab Setup
+
+1. Go to your GitLab account and create a new project
+2. Add these variables in GitLab (Settings > CI/CD > Variables):
+   ```
+   CI_USER_DOCKER=<your-gitlab-username>
+   CI_TOKEN_DOCKER=<your-gitlab-access-token>
+   ```
+
+### 3. GCP Setup
+
+1. Create a GCP Project (or use existing one)
+2. Enable required APIs:
+   ```bash
+   gcloud services enable container.googleapis.com
+   ```
+
+3. Create Service Account:
+   ```bash
+   # Create service account
+   gcloud iam service-accounts create gitlab-gke --display-name="GitLab GKE"
+   
+   # Add roles
+   gcloud projects add-iam-policy-binding <your-project-id> \
+     --member="serviceAccount:gitlab-gke@<your-project-id>.iam.gserviceaccount.com" \
+     --role="roles/container.developer"
+   
+   # Download key
+   gcloud iam service-accounts keys create gitlab-gke.json \
+     --iam-account=gitlab-gke@<your-project-id>.iam.gserviceaccount.com
+   ```
+
+4. Add GCP variables to GitLab:
+   ```bash
+   # Convert service account key to base64
+   base64 -i gitlab-gke.json | pbcopy  # Now in clipboard
+   ```
+   
+   Add to GitLab (Settings > CI/CD > Variables):
+   ```
+   GKE_SERVICE_ACCOUNT=<base64-service-account-from-clipboard>
+   GKE_PROJECT=<your-gcp-project-id>
+   GKE_CLUSTER_NAME=my-k8s-dev
+   GKE_ZONE=southamerica-east1-a
+   ```
+
+### 4. Create GKE Cluster
+
+```bash
+# Set your GCP project
+gcloud config set project <your-project-id>
+
+# Create cluster
+gcloud container clusters create my-k8s-dev \
+  --zone southamerica-east1-a \
+  --num-nodes 2 \
+  --machine-type e2-medium
+
+# Get credentials
+gcloud container clusters get-credentials my-k8s-dev --zone southamerica-east1-a
+```
+
+### 5. Configure GitLab Registry
+
+```bash
+# Create registry secret in Kubernetes
+kubectl create secret docker-registry gitlab-registry \
+  --docker-server=registry.gitlab.com \
+  --docker-username=$CI_USER_DOCKER \
+  --docker-password=$CI_TOKEN_DOCKER \
+  --docker-email=<your-email>
+```
+
+### 6. Setup GitLab Runner (Optional, for local testing)
+
+```bash
+# Install GitLab Runner
+brew install gitlab-runner  # macOS
+# or
+curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash  # Ubuntu
+
+# Register runner
+gitlab-runner register \
+  --url "https://gitlab.com/" \
+  --registration-token "<your-project-runner-token>" \
+  --description "my-gke-runner" \
+  --executor "docker" \
+  --docker-image "docker:19.03.12"
+```
+
+### 7. First Deployment
+
+1. Push code to GitLab:
+   ```bash
+   git add .
+   git commit -m "Initial setup"
+   git push origin main
+   ```
+
+2. Watch the pipeline:
+   - Go to your GitLab project
+   - Click CI/CD > Pipelines
+   - Watch the stages execute
+
+3. Verify deployment:
+   ```bash
+   # Check pods
+   kubectl get pods -n my-application
+
+   # Check services
+   kubectl get svc -n my-application
+
+   # Get the application URL
+   kubectl get ingress -n my-application
+   ```
+
+### Troubleshooting
+
+If something goes wrong:
+
+1. **Pipeline Fails**:
+   - Check CI/CD > Pipelines > Latest pipeline > Failed job
+   - Look at the job logs for errors
+
+2. **Pods Not Running**:
+   ```bash
+   # Check pod status
+   kubectl get pods -n my-application
+   
+   # Check pod logs
+   kubectl logs <pod-name> -n my-application
+   
+   # Describe pod for events
+   kubectl describe pod <pod-name> -n my-application
+   ```
+
+3. **Registry Issues**:
+   ```bash
+   # Verify secret
+   kubectl get secret gitlab-registry -n my-application -o yaml
+   
+   # Check if secret is properly referenced
+   kubectl describe pod <pod-name> -n my-application | grep "pull secret"
+   ```
+
 ## Requirements
 
 Before you begin, ensure you have the following installed:
@@ -18,34 +175,116 @@ Before you begin, ensure you have the following installed:
 * `helm` - Kubernetes package manager
 * `gcloud` - Google Cloud SDK
 
-## Step by Step Guide
+## Pipeline Overview
 
-### 1. Create a Kubernetes Cluster on GKE
+The GitLab CI/CD pipeline (`.gitlab-ci.yml`) automates the entire deployment process. Here's how it works:
 
+### Pipeline Stages
+
+1. **Build**
+   - Builds Docker images for frontend and backend
+   - Uses multi-stage build for backend optimization
+   - Runs on all branches except main
+
+2. **Test**
+   - Builds images
+   - Runs containers
+   - Validates health check endpoints
+   - Ensures application functionality
+
+3. **Push**
+   - Authenticates with GitLab registry
+   - Pushes images to registry
+   - Tags images with version numbers
+
+4. **Pull**
+   - Pulls images from registry
+   - Validates container startup
+   - Only runs on main branch
+
+5. **Deploy**
+   - Uses Helm for deployment
+   - Configures GKE authentication
+   - Deploys application to Kubernetes
+   - Sets up services and ingress
+
+### Required Variables
+
+Configure these variables in GitLab (Settings > CI/CD > Variables):
+
+| Variable | Description |
+|----------|-------------|
+| `CI_USER_DOCKER` | GitLab registry username |
+| `CI_TOKEN_DOCKER` | GitLab registry token |
+| `GKE_SERVICE_ACCOUNT` | Base64 encoded GCP service account key |
+| `GKE_PROJECT` | GCP project ID |
+| `GKE_CLUSTER_NAME` | GKE cluster name |
+| `GKE_ZONE` | GCP zone (e.g., southamerica-east1-a) |
+
+### Pipeline Configuration
+
+```yaml
+# Key pipeline variables
+variables: 
+  CI_REGISTRY: registry.gitlab.com
+  REGISTRY_REPO_NAME: estudo-ci
+  NAMESPACE: my-application
+  FIRST_IMAGE: backend
+  SECOND_IMAGE: frontend
+  BACK_VERSION: "1.0"
+  FRONT_VERSION: "1.0"
+```
+
+### Automatic vs Manual Deployment
+
+While the [Quick Start](#quick-start-manual-deployment) section shows manual deployment steps, the pipeline automates everything:
+
+| Task | Manual | Pipeline |
+|------|---------|----------|
+| GKE Authentication | Configure `gcloud` locally | Uses service account |
+| Image Building | Local Docker build | Automated in CI |
+| Registry Access | Local Docker login | Uses CI variables |
+| Deployment | Manual Helm commands | Automated with variables |
+| Testing | Manual container testing | Automated health checks |
+
+### Pipeline Workflow
+
+```mermaid
+graph TD
+    A[Feature Branch] -->|Push| B[Build Stage]
+    B --> C[Test Stage]
+    C --> D[Push Stage]
+    D --> E[Merge to Main]
+    E --> F[Pull Stage]
+    F --> G[Deploy Stage]
+    G --> H[Running on GKE]
+```
+
+## Quick Start (Manual Deployment)
+
+If you already have all requirements installed and configured, here are the steps for manual deployment:
+
+1. **Clone the repository**
 ```bash
-# Create a new cluster
-gcloud container clusters create my-k8s-dev --zone southamerica-east1-a --project <your-project-id>
+git clone <your-repo-url>
+cd my-gitlab-ci-cd-gke-helm
+```
 
-# Verify your current context
-kubectl config current-context 
+2. **Configure GKE Access**
+```bash
+# Set your GCP project
+gcloud config set project <your-project-id>
 
-# Configure kubectl to use the new cluster
+# Create GKE cluster (if not exists)
+gcloud container clusters create my-k8s-dev --zone southamerica-east1-a
+
+# Get credentials for kubectl
 gcloud container clusters get-credentials my-k8s-dev --zone southamerica-east1-a
 ```
 
-### 2. Set up GCP Service Account
-
-1. Create a service account in GCP to allow GitLab to interact with GKE
-   * Navigate to GCP Console > IAM & Admin > Service Accounts
-   * Create a new service account with appropriate permissions
-   * Generate and download a JSON key file
-   * For detailed instructions, visit: https://cloud.google.com/compute/docs/access/service-accounts
-
-### 3. Configure GitLab Registry Access
-
-Create a Kubernetes secret to allow GKE to pull images from GitLab's registry:
-
+3. **Configure GitLab Registry Access**
 ```bash
+# Create registry secret in Kubernetes
 kubectl create secret docker-registry gitlab-registry \
   --docker-server=registry.gitlab.com \
   --docker-username=<your-gitlab-username> \
@@ -53,98 +292,83 @@ kubectl create secret docker-registry gitlab-registry \
   --docker-email=<your-email>
 ```
 
-Then create a Deploy Token in GitLab:
-1. Go to your GitLab project
-2. Navigate to Settings > Repository > Deploy tokens
-3. Create a new token with appropriate permissions
-
-### 4. Create Kubernetes Service Account for GitLab
-
-Create the service account configuration file:
-
+4. **Create Service Account for GitLab**
 ```bash
-# Create the configuration file
-cat << EOF > gitlab-admin-service-account.yaml
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: gitlab
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: gitlab-admin
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-  - kind: ServiceAccount
-    name: gitlab
-    namespace: kube-system
-EOF
-
-# Apply the configuration
-kubectl create -f gitlab-admin-service-account.yaml
+# Apply the service account configuration
+kubectl apply -f gitlab-admin-service-account.yaml
 ```
 
-### 5. Integrate GKE with GitLab
-
-Collect the following information to configure in GitLab:
-
+5. **Get Cluster Information for GitLab**
 ```bash
-# Get the cluster API URL
+# Get API URL
 kubectl cluster-info | grep -E 'Kubernetes master|Kubernetes control plane' | awk '/http/ {print $NF}'
 
-# Get the CA Certificate
+# Get CA Certificate
 kubectl get secret default-token-l76rk -o jsonpath="{['data']['ca\.crt']}" | base64 --decode
 
-# Get the Service Account Token
+# Get Service Account Token
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab | awk '{print $1}')
 ```
 
-### 6. Configure GitLab CI/CD
+6. **Deploy Using Helm**
+```bash
+# Go to Helm chart directory
+cd my-helm
 
-1. In your GitLab project, go to Infrastructure > Kubernetes
-2. Add a new Kubernetes cluster
-3. Fill in the following information:
-   * API URL (from step 5)
-   * CA Certificate (from step 5)
-   * Service Account Token (from step 5)
-4. Save the configuration
+# Validate the chart
+helm lint .
 
-### 7. Configure Helm
+# Test the deployment (dry-run)
+helm install my-app . --dry-run --debug
 
-Helm will be used to manage your Kubernetes applications. Make sure your `.gitlab-ci.yml` includes Helm commands for deployment.
-
-Example `.gitlab-ci.yml` structure:
-```yaml
-stages:
-  - build
-  - deploy
-
-build:
-  stage: build
-  script:
-    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-
-deploy:
-  stage: deploy
-  script:
-    - helm upgrade --install my-app ./helm-chart \
-      --set image.tag=$CI_COMMIT_SHA \
-      --namespace my-namespace
+# Deploy the application
+helm install my-app . --create-namespace --namespace my-app
 ```
+
+7. **Verify Deployment**
+```bash
+# Check pods status
+kubectl get pods -n my-app
+
+# Check services
+kubectl get svc -n my-app
+
+# Check ingress
+kubectl get ingress -n my-app
+```
+
+## Step by Step Guide
+
+For a detailed explanation of each component and configuration, please refer to:
+
+1. [Helm Chart Documentation](./my-helm/README.md)
+2. [GitLab CI/CD Pipeline Configuration](./.gitlab-ci.yml)
 
 ## Troubleshooting
 
-Common issues and their solutions:
-* If you can't pull images from GitLab registry, verify your registry secret is correctly configured
-* If GitLab can't connect to GKE, check your service account permissions
-* For Helm issues, ensure your chart is properly configured and validated
+If you encounter issues during deployment:
+
+1. **Check GKE Cluster Status**
+```bash
+gcloud container clusters list
+kubectl cluster-info
+```
+
+2. **Verify GitLab Registry Secret**
+```bash
+kubectl get secrets | grep gitlab-registry
+```
+
+3. **Check Pod Logs**
+```bash
+kubectl logs -f <pod-name> -n my-app
+```
+
+4. **Debug Helm Release**
+```bash
+helm list -n my-app
+helm get manifest my-app -n my-app
+```
 
 ## References
 * [GitLab Kubernetes Integration](https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html)
