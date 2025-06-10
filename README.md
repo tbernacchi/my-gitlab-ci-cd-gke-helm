@@ -8,6 +8,37 @@
 	<img align="center" width="300px" src="/.github/assets/img/google-cloud-logo.png">
 </div>
 
+## TL;DR (Quick Start)
+
+1. **GCP Setup**:
+   ```bash
+   # Enable GKE API and create cluster
+   gcloud services enable container.googleapis.com
+   gcloud container clusters create my-k8s-dev --zone southamerica-east1-a
+   
+   # Create and download service account key
+   gcloud iam service-accounts create gitlab-gke
+   gcloud iam service-accounts keys create gitlab-gke.json --iam-account=gitlab-gke@<project-id>.iam.gserviceaccount.com
+   ```
+
+2. **GitLab Setup** (Settings > CI/CD > Variables):
+   ```
+   GKE_SERVICE_ACCOUNT=<base64 of gitlab-gke.json>
+   GKE_PROJECT=<project-id>
+   GKE_CLUSTER_NAME=my-k8s-dev
+   GKE_ZONE=southamerica-east1-a
+   CI_USER_DOCKER=<gitlab-username>
+   CI_TOKEN_DOCKER=<gitlab-token>
+   ```
+
+3. **Deploy**:
+   ```bash
+   git push origin main
+   # Watch pipeline at: GitLab > CI/CD > Pipelines
+   ```
+
+Need more details? Check the [complete setup guide](#getting-started) below.
+
 ## Getting Started
 
 Just cloned the project? Here's how to get it running:
